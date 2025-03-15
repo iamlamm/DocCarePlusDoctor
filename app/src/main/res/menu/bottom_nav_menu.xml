@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_appointments"
+        android:icon="@drawable/ic_calendar"
+        android:title="@string/nav_appointments_title" />
+    <item
+        android:id="@+id/nav_telehealth"
+        android:icon="@drawable/ic_message"
+        android:title="@string/nav_telehealth_title" />
+    <item
+        android:id="@+id/nav_notifications"
+        android:icon="@drawable/ic_notification"
+        android:title="@string/nav_notifications_title" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_edit_profile"
+        android:title="@string/nav_profile_title" />
+</menu>
