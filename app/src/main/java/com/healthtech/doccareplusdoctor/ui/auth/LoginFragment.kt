@@ -119,7 +119,7 @@ class LoginFragment : BaseFragment() {
                 onError = { errorMessage ->
                     binding.btnLoginSubmit.isEnabled = true
                     binding.progressBarLogin.setLoading(false)
-                    
+
                     if (errorMessage.contains("không phải là tài khoản bác sĩ")) {
                         showInfoDialog(
                             title = "Sai loại tài khoản",
@@ -186,22 +186,33 @@ class LoginFragment : BaseFragment() {
         val password = binding.etLoginPassword.text.toString()
         return when {
             !hasPasswordFocused && password.isEmpty() -> {
-                binding.tilLoginPassword.error = null
+//                binding.tilLoginPassword.error = null
+                binding.tilLoginPassword.helperText = null
+                binding.tilLoginPassword.isHelperTextEnabled = false
                 false
             }
 
             hasPasswordFocused && password.isEmpty() -> {
-                binding.tilLoginPassword.error = getString(R.string.password_required)
+//                binding.tilLoginPassword.error = getString(R.string.password_required)
+//                false
+                binding.tilLoginPassword.helperText = getString(R.string.password_required)
+                binding.tilLoginPassword.isHelperTextEnabled = true
                 false
             }
 
             !ValidationUtils.isValidPassword(password) -> {
-                binding.tilLoginPassword.error = getString(R.string.invalid_password)
+//                binding.tilLoginPassword.error = getString(R.string.invalid_password)
+//                false
+                binding.tilLoginPassword.helperText = getString(R.string.invalid_password)
+                binding.tilLoginPassword.isHelperTextEnabled = true
                 false
             }
 
             else -> {
-                binding.tilLoginPassword.error = null
+//                binding.tilLoginPassword.error = null
+//                true
+                binding.tilLoginPassword.helperText = null
+                binding.tilLoginPassword.isHelperTextEnabled = false
                 true
             }
         }

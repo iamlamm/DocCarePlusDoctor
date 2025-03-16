@@ -25,8 +25,8 @@
         app:layout_constraintTop_toBottomOf="@id/tvAppointmentTitle"
         tools:listitem="@layout/item_appointment" />
 
-    <ProgressBar
-        android:id="@+id/progressBar"
+    <com.healthtech.doccareplusdoctor.ui.widgets.loading.LoadingView
+        android:id="@+id/progress_bar_appointment"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"

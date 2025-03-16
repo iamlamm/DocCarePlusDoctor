@@ -71,13 +71,13 @@ class AppointmentFragment : BaseFragment() {
     }
 
     private fun showLoading() {
-        binding.progressBar.visibility = View.VISIBLE
+        binding.progressBarAppointment.setLoading(true)
         binding.rvAppointments.visibility = View.GONE
         binding.tvEmptyState.visibility = View.GONE
     }
 
     private fun showAppointments(appointments: List<Appointment>) {
-        binding.progressBar.visibility = View.GONE
+        binding.progressBarAppointment.setLoading(false)
 
         if (appointments.isEmpty()) {
             binding.rvAppointments.visibility = View.GONE
@@ -90,7 +90,7 @@ class AppointmentFragment : BaseFragment() {
     }
 
     private fun showError(message: String) {
-        binding.progressBar.visibility = View.GONE
+        binding.progressBarAppointment.setLoading(false)
         binding.rvAppointments.visibility = View.GONE
         binding.tvEmptyState.visibility = View.VISIBLE
         binding.tvEmptyState.text = message

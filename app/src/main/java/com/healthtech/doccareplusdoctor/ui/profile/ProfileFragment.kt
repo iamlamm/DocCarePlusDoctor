@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
@@ -14,7 +15,9 @@ import com.healthtech.doccareplusdoctor.databinding.FragmentProfileBinding
 import com.healthtech.doccareplusdoctor.domain.model.Doctor
 import com.healthtech.doccareplusdoctor.utils.SnackbarUtils
 import com.healthtech.doccareplusdoctor.utils.formatToUSD
+import com.healthtech.doccareplusdoctor.utils.showWarningDialog
 import dagger.hilt.android.AndroidEntryPoint
+
 
 @AndroidEntryPoint
 class ProfileFragment : BaseFragment() {
@@ -49,15 +52,27 @@ class ProfileFragment : BaseFragment() {
                     message = "Tính năng đang được phát triển"
                 )
             }
+
+            btnLogout.setOnClickListener {
+                showLogoutConfirmationDialog()
+            }
         }
+    }
+
+    private fun showLogoutConfirmationDialog() {
+        showWarningDialog(
+            title = getString(R.string.logout),
+            message = getString(R.string.logout_confirmation),
+            positiveText = getString(R.string.logout),
+            negativeText = getString(R.string.cancel),
+            onPositive = { viewModel.logout() }
+        )
     }
 
     private fun observeUiState() {
         viewModel.uiState.collectWithLifecycle { state ->
             when (state) {
-                is UiState.Loading -> {
-                    // Optional: Show loading indicator if needed
-                }
+                is UiState.Loading -> {}
 
                 is UiState.Success -> {
                     updateUI(state.data)
@@ -68,6 +83,18 @@ class ProfileFragment : BaseFragment() {
                         view = binding.root,
                         message = state.message
                     )
+                }
+
+                else -> Unit
+            }
+        }
+
+        viewModel.logoutState.collectWithLifecycle { state ->
+            when (state) {
+                is UiState.Loading -> {}
+
+                is UiState.Success -> {
+                    navigateToLogin()
                 }
 
                 else -> Unit
@@ -102,6 +129,10 @@ class ProfileFragment : BaseFragment() {
 
     private fun navigateBack() {
         requireActivity().onBackPressedDispatcher.onBackPressed()
+    }
+
+    private fun navigateToLogin() {
+        findNavController().navigate(R.id.action_profile_to_login)
     }
 
     override fun cleanupViewReferences() {
