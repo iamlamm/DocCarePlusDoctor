@@ -1,6 +1,5 @@
 package com.healthtech.doccareplusdoctor.ui.splash
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.healthtech.doccareplusdoctor.R
@@ -9,6 +8,7 @@ import com.healthtech.doccareplusdoctor.data.local.preferences.DoctorPreferences
 import com.zegocloud.zimkit.services.ZIMKit
 import dagger.hilt.android.lifecycle.HiltViewModel
 import im.zego.zim.enums.ZIMErrorCode
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -28,16 +28,16 @@ class SplashViewModel @Inject constructor(
             try {
                 _navigationState.value = UiState.Loading
                 
+                delay(500)
+                
                 val isLoggedIn = doctorPreferences.isDoctorLoggedIn()
                 val doctor = doctorPreferences.getDoctor()
-
-                Timber.tag("SplashViewModel").d("isLoggedIn: " + isLoggedIn + ", doctor: " + doctor)
+                
+                Timber.tag("SplashViewModel").d("isLoggedIn: $isLoggedIn, doctor: $doctor")
 
                 val destination = if (isLoggedIn && doctor != null) {
                     try {
-                        doctor.avatar.let { avatar ->
-                            connectToZegoCloud(doctor.id, doctor.name, avatar)
-                        }
+                        connectToZegoCloud(doctor.id, doctor.name, doctor.avatar)
                     } catch (e: Exception) {
                         Timber.tag("SplashViewModel")
                             .e("Error connecting to ZegoCloud: %s", e.message)
@@ -46,11 +46,12 @@ class SplashViewModel @Inject constructor(
                 } else {
                     R.id.loginFragment
                 }
-                
+
                 _navigationState.value = UiState.Success(destination)
             } catch (e: Exception) {
                 Timber.tag("SplashViewModel").e("Error checking login status: %s", e.message)
-                _navigationState.value = UiState.Error("Không thể kiểm tra trạng thái đăng nhập: ${e.message}")
+                _navigationState.value =
+                    UiState.Error("Không thể kiểm tra trạng thái đăng nhập: ${e.message}")
             }
         }
     }

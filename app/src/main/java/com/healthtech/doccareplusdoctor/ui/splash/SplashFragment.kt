@@ -34,14 +34,20 @@ class SplashFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        
+        // Đảm bảo view được hiển thị
+        binding.root.visibility = View.VISIBLE
+        
+        // Bắt đầu animation ngay lập tức
         startLogoAnimation()
-        if (_binding != null) {
-            binding.progressBarSplash.setLoading(true)
-        }
+        binding.progressBarSplash.setLoading(true)
+        
+        // Đợi animation hoàn thành rồi mới check login
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(1500)
+            delay(1500) // Đợi animation fade in hoàn thành
             viewModel.checkLoginStatus()
         }
+        
         observeNavigationState()
     }
     
@@ -68,10 +74,12 @@ class SplashFragment : BaseFragment() {
     
     private fun startLogoAnimation() {
         try {
+            // Set alpha về 0 để chuẩn bị fade in
             binding.imageView.alpha = 0f
             binding.imageView2.alpha = 0f
             binding.progressBarSplash.alpha = 0f
 
+            // Animation fade in
             fadeInSequentially(
                 binding.imageView,
                 binding.imageView2,
@@ -84,15 +92,17 @@ class SplashFragment : BaseFragment() {
     }
     
     private fun fadeOutAndNavigate(destination: Int) {
-        // Fade out tất cả các view trong splash
-        binding.imageView.fadeOut(duration = 500)
-        binding.imageView2.fadeOut(duration = 500)
-        binding.progressBarSplash.fadeOut(duration = 500)
-        
-        // Sau khi fade out hoàn tất, thực hiện navigation
-        binding.root.fadeOut(duration = 800) {
-            if (isAdded && !isDetached) {
-                navigateToDestination(destination)
+        viewLifecycleOwner.lifecycleScope.launch {
+            delay(500) // Thêm delay nhỏ trước khi fade out
+            
+            binding.imageView.fadeOut(duration = 500)
+            binding.imageView2.fadeOut(duration = 500)
+            binding.progressBarSplash.fadeOut(duration = 500)
+            
+            binding.root.fadeOut(duration = 800) {
+                if (isAdded && !isDetached) {
+                    navigateToDestination(destination)
+                }
             }
         }
     }

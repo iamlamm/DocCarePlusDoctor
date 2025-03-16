@@ -69,16 +69,16 @@
 
         <!-- Thông tin bác sĩ -->
         <de.hdodenhof.circleimageview.CircleImageView
-            android:id="@+id/iv_doctor_avatar"
+            android:id="@+id/iv_user_avatar"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_marginTop="12dp"
-            android:src="@drawable/doctor"
+            android:src="@mipmap/avatar_male_default"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider" />
 
         <TextView
-            android:id="@+id/tv_doctor_name"
+            android:id="@+id/tv_user_name"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
@@ -86,8 +86,8 @@
             android:textSize="16sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_doctor_avatar"
-            app:layout_constraintTop_toTopOf="@id/iv_doctor_avatar"
+            app:layout_constraintStart_toEndOf="@id/iv_user_avatar"
+            app:layout_constraintTop_toTopOf="@id/iv_user_avatar"
             tools:text="Dr. Amanda Smith" />
 
         <TextView
@@ -98,8 +98,8 @@
             android:textColor="@color/gray"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_doctor_avatar"
-            app:layout_constraintTop_toBottomOf="@id/tv_doctor_name"
+            app:layout_constraintStart_toEndOf="@id/iv_user_avatar"
+            app:layout_constraintTop_toBottomOf="@id/tv_user_name"
             tools:text="Mã cuộc hẹn: #AP12345" />
 
         <!-- Địa điểm cuộc hẹn -->
@@ -114,7 +114,7 @@
             android:textSize="14sp"
             app:drawableStartCompat="@drawable/ic_location"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_doctor_avatar"
+            app:layout_constraintStart_toEndOf="@id/iv_user_avatar"
             app:layout_constraintTop_toBottomOf="@id/tv_appointment_id"
             tools:text="Phòng khám số 3, Tầng 2" />
 
@@ -131,11 +131,11 @@
 
             <!-- Nút nhắn tin (icon only) -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnMessage"
+                android:id="@+id/btn_message"
                 android:layout_width="36dp"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:backgroundTint="#4CAF50"
+                android:backgroundTint="@color/green_500"
                 android:insetLeft="0dp"
                 android:insetTop="0dp"
                 android:insetRight="0dp"
@@ -146,7 +146,41 @@
                 app:iconGravity="textStart"
                 app:iconPadding="0dp"
                 app:iconSize="20dp"
-                app:iconTint="@color/white" />
+                app:iconTint="@color/white"
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_voice_call"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:backgroundTint="@color/green_500"
+                android:insetLeft="0dp"
+                android:insetTop="0dp"
+                android:insetRight="0dp"
+                android:insetBottom="0dp"
+                android:padding="0dp"
+                app:cornerRadius="10dp"
+                app:icon="@drawable/call"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconSize="20dp"
+                app:iconTint="@color/white"
+                tools:ignore="TouchTargetSizeCheck,SpeakableTextPresentCheck" />
+
+
+            <!--            <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton-->
+            <!--                android:id="@+id/btn_voice_call"-->
+            <!--                android:layout_width="36dp"-->
+            <!--                android:layout_height="36dp"-->
+            <!--                android:layout_marginEnd="8dp"-->
+            <!--                android:background="@color/green_500" />-->
+
+            <!--            <com.zegocloud.uikit.prebuilt.call.invite.widget.ZegoSendCallInvitationButton-->
+            <!--                android:id="@+id/btn_video_call"-->
+            <!--                android:layout_width="36dp"-->
+            <!--                android:layout_height="36dp"-->
+            <!--                android:layout_marginEnd="8dp" />-->
 
             <!-- Nút đổi lịch -->
             <com.google.android.material.button.MaterialButton
@@ -161,7 +195,8 @@
                 android:text="ĐỔI LỊCH"
                 android:textAllCaps="true"
                 android:textSize="12sp"
-                app:cornerRadius="10dp" />
+                app:cornerRadius="10dp"
+                tools:ignore="TouchTargetSizeCheck" />
 
 
             <!-- Nút hủy lịch -->
@@ -176,7 +211,8 @@
                 android:text="HỦY LỊCH"
                 android:textAllCaps="true"
                 android:textSize="12sp"
-                app:cornerRadius="10dp" />
+                app:cornerRadius="10dp"
+                tools:ignore="TouchTargetSizeCheck" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>

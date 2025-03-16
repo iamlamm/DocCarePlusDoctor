@@ -7,15 +7,22 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import androidx.navigation.fragment.findNavController
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
 import com.healthtech.doccareplusdoctor.common.state.UiState
+import com.healthtech.doccareplusdoctor.data.local.preferences.DoctorPreferences
 import com.healthtech.doccareplusdoctor.databinding.FragmentAppointmentBinding
 import com.healthtech.doccareplusdoctor.domain.model.Appointment
-import com.zegocloud.zimkit.services.ZIMKit
+import com.healthtech.doccareplusdoctor.ui.call.CallActivity
+import com.healthtech.doccareplusdoctor.utils.SnackbarUtils
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.util.UUID
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class AppointmentFragment : BaseFragment() {
@@ -25,6 +32,9 @@ class AppointmentFragment : BaseFragment() {
 
     private val viewModel: AppointmentViewModel by viewModels()
     private lateinit var appointmentAdapter: AppointmentAdapter
+
+    @Inject
+    lateinit var doctorPreferences: DoctorPreferences
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +60,9 @@ class AppointmentFragment : BaseFragment() {
             },
             onMessageClick = { appointment ->
                 navigateToChat(appointment)
+            },
+            onVoiceCallClick = { appointment ->
+                navigateToVoiceCall(appointment)
             }
         )
 
@@ -60,49 +73,61 @@ class AppointmentFragment : BaseFragment() {
     }
 
     private fun observeAppointments() {
-        viewModel.appointmentsState.collectWithLifecycle { state ->
-            handleUiState(
-                state = state,
-                onLoading = { showLoading() },
-                onSuccess = { appointments -> showAppointments(appointments) },
-                onError = { error -> showError(error) }
-            )
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.appointmentsState.collect { state ->
+                    Timber.d("Received appointment state: $state")
+                    
+                    when (state) {
+                        is UiState.Loading -> {
+                            Timber.d("Loading appointments...")
+                            binding.progressBarAppointment.setLoading(true)
+                            binding.rvAppointments.visibility = View.GONE
+                            binding.tvEmptyState.visibility = View.GONE
+                        }
+                        
+                        is UiState.Success -> {
+                            Timber.d("Appointments loaded: ${state.data.size} items")
+                            binding.progressBarAppointment.setLoading(false)
+                            
+                            if (state.data.isEmpty()) {
+                                binding.rvAppointments.visibility = View.GONE
+                                binding.tvEmptyState.visibility = View.VISIBLE
+                                binding.tvEmptyState.text = "Không có cuộc hẹn nào"
+                            } else {
+                                binding.rvAppointments.visibility = View.VISIBLE
+                                binding.tvEmptyState.visibility = View.GONE
+                                appointmentAdapter.submitList(state.data)
+                            }
+                        }
+                        
+                        is UiState.Error -> {
+                            Timber.e("Error loading appointments: ${state.message}")
+                            binding.progressBarAppointment.setLoading(false)
+                            binding.rvAppointments.visibility = View.GONE
+                            binding.tvEmptyState.visibility = View.VISIBLE
+                            binding.tvEmptyState.text = state.message
+                        }
+                        
+                        else -> {
+                            binding.progressBarAppointment.setLoading(false)
+                        }
+                    }
+                }
+            }
         }
-    }
-
-    private fun showLoading() {
-        binding.progressBarAppointment.setLoading(true)
-        binding.rvAppointments.visibility = View.GONE
-        binding.tvEmptyState.visibility = View.GONE
-    }
-
-    private fun showAppointments(appointments: List<Appointment>) {
-        binding.progressBarAppointment.setLoading(false)
-
-        if (appointments.isEmpty()) {
-            binding.rvAppointments.visibility = View.GONE
-            binding.tvEmptyState.visibility = View.VISIBLE
-        } else {
-            binding.rvAppointments.visibility = View.VISIBLE
-            binding.tvEmptyState.visibility = View.GONE
-            appointmentAdapter.submitList(appointments)
-        }
-    }
-
-    private fun showError(message: String) {
-        binding.progressBarAppointment.setLoading(false)
-        binding.rvAppointments.visibility = View.GONE
-        binding.tvEmptyState.visibility = View.VISIBLE
-        binding.tvEmptyState.text = message
-
-        Toast.makeText(requireContext(), message, Toast.LENGTH_LONG).show()
     }
 
     private fun handleRescheduleClick(appointment: Appointment) {
-        // Xử lý logic đổi lịch - có thể điều hướng đến màn hình RescheduleFragment
-        Toast.makeText(requireContext(), "Đổi lịch cuộc hẹn: ${appointment.id}", Toast.LENGTH_SHORT)
-            .show()
-        viewModel.rescheduleAppointment(appointment.id)
+//        // Xử lý logic đổi lịch - có thể điều hướng đến màn hình RescheduleFragment
+//        Toast.makeText(requireContext(), "Đổi lịch cuộc hẹn: ${appointment.id}", Toast.LENGTH_SHORT)
+//            .show()
+//        SnackbarUtils.showSuccessSnackbar(binding.root, "Đổi lịch cuộc hẹn: ${appointment.id}")
+//        viewModel.rescheduleAppointment(appointment.id)
+        SnackbarUtils.showInfoSnackbar(
+            view = binding.root,
+            message = "Tính năng đổi lịch đang được phát triển"
+        )
     }
 
     private fun handleCancelClick(appointment: Appointment) {
@@ -136,6 +161,41 @@ class AppointmentFragment : BaseFragment() {
                 "Không thể mở cuộc trò chuyện: ${e.message}",
                 Toast.LENGTH_SHORT
             ).show()
+        }
+    }
+
+    private fun navigateToVoiceCall(appointment: Appointment) {
+        val userId = appointment.userId
+        val userName = if (appointment.patientName.isNotEmpty()) {
+            appointment.patientName
+        } else {
+            "Bệnh nhân"
+        }
+
+        Timber.d("Starting voice call with user: $userId")
+        Timber.d("User name: $userName")
+
+        try {
+            val callID = "voice_${appointment.id}"
+            val doctorId = doctorPreferences.getDoctor()?.id ?: UUID.randomUUID().toString()
+            val doctorName = doctorPreferences.getDoctor()?.name ?: "Bác sĩ"
+            val intent = Intent(requireContext(), CallActivity::class.java).apply {
+                putExtra("callID", callID)
+                putExtra("userID", userId)
+                putExtra("userName", userName)
+                putExtra("isVoiceCall", true)  // Voice call
+                putExtra("doctorId", doctorId)
+                putExtra("doctorName", doctorName)
+            }
+            startActivity(intent)
+
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(),
+                "Không thể bắt đầu cuộc gọi: ${e.message}",
+                Toast.LENGTH_SHORT
+            ).show()
+            Timber.e(e, "Error starting voice call")
         }
     }
 

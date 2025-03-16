@@ -12,11 +12,13 @@ import com.healthtech.doccareplusdoctor.databinding.ItemAppointmentBinding
 import com.healthtech.doccareplusdoctor.domain.model.Appointment
 import java.text.SimpleDateFormat
 import java.util.Locale
+import timber.log.Timber
 
 class AppointmentAdapter(
     private val onRescheduleClick: (Appointment) -> Unit,
     private val onCancelClick: (Appointment) -> Unit,
-    private val onMessageClick: (Appointment) -> Unit
+    private val onMessageClick: (Appointment) -> Unit,
+    private val onVoiceCallClick: (Appointment) -> Unit
 ) : ListAdapter<Appointment, AppointmentAdapter.AppointmentViewHolder>(AppointmentDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): AppointmentViewHolder {
@@ -46,9 +48,13 @@ class AppointmentAdapter(
             }
 
             binding.tvAppointmentDate.text = date
-            binding.tvAppointmentTime.text = "${appointment.startTime} - ${appointment.endTime}"
-            binding.tvDoctorName.text = appointment.patientName
-            binding.tvAppointmentId.text = "Mã cuộc hẹn: #${appointment.id.takeLast(7)}"
+            if (appointment.startTime.isNotBlank() && appointment.endTime.isNotBlank()) {
+                binding.tvAppointmentTime.text = "${appointment.startTime} - ${appointment.endTime}"
+            } else {
+                binding.tvAppointmentTime.text = "Chưa có thông tin"
+            }
+            binding.tvUserName.text = appointment.patientName
+            binding.tvAppointmentId.text = "Mã cuộc hẹn: #${appointment.id}"
             binding.tvLocation.text = appointment.location
 
             // Hiển thị trạng thái
@@ -84,11 +90,16 @@ class AppointmentAdapter(
                 .load(appointment.patientAvatar)
                 .placeholder(R.mipmap.avatar_male_default)
                 .error(R.mipmap.avatar_male_default)
-                .into(binding.ivDoctorAvatar)
+                .into(binding.ivUserAvatar)
 
             // Thêm xử lý sự kiện click cho nút message
             binding.btnMessage.setOnClickListener {
                 onMessageClick(appointment)
+            }
+
+            // Thêm xử lý sự kiện click cho nút voice call
+            binding.btnVoiceCall.setOnClickListener {
+                onVoiceCallClick(appointment)
             }
 
             // Xử lý sự kiện nút
@@ -99,6 +110,8 @@ class AppointmentAdapter(
             binding.btnCancel.setOnClickListener {
                 onCancelClick(appointment)
             }
+
+            Timber.d("Binding appointment: ${appointment.id}, startTime: ${appointment.startTime}, endTime: ${appointment.endTime}, slotId: ${appointment.slotId}")
         }
     }
 

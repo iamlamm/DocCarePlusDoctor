@@ -7,16 +7,20 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.viewModels
 import com.google.android.material.snackbar.Snackbar
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
 import com.healthtech.doccareplusdoctor.common.dialogs.CustomDialogFragment
 import com.healthtech.doccareplusdoctor.databinding.FragmentTelehealthBinding
+import com.healthtech.doccareplusdoctor.utils.PermissionManager
 import com.healthtech.doccareplusdoctor.utils.SnackbarUtils
-import com.healthtech.doccareplusdoctor.utils.showInfoDialog
+import com.zegocloud.uikit.plugin.invitation.ZegoInvitationType
+import com.zegocloud.uikit.prebuilt.call.ZegoUIKitPrebuiltCallService
+import com.zegocloud.uikit.service.defines.ZegoUIKitUser
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class TelehealthFragment : BaseFragment() {
@@ -63,11 +67,7 @@ class TelehealthFragment : BaseFragment() {
                 }
 
                 R.id.action_voice_call -> {
-                    SnackbarUtils.showInfoSnackbar(
-                        binding.root,
-                        "Tính năng gọi điện đang được phát triển",
-                        Snackbar.LENGTH_SHORT
-                    )
+                    showVoiceCallDialog()
                     true
                 }
 
@@ -121,6 +121,74 @@ class TelehealthFragment : BaseFragment() {
         }
 
         dialogFragment.show(childFragmentManager, "chat_dialog")
+    }
+
+    @SuppressLint("InflateParams")
+    private fun showVoiceCallDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_input_call_id, null)
+        val userIdEditText = dialogView.findViewById<EditText>(R.id.et_user_id)
+        val cancelButton = dialogView.findViewById<Button>(R.id.btn_cancel)
+        val startCallButton = dialogView.findViewById<Button>(R.id.btn_start_call)
+
+        val dialog = AlertDialog.Builder(requireContext())
+            .setView(dialogView)
+            .setTitle("Gọi điện thoại")
+            .create()
+
+        cancelButton.setOnClickListener { dialog.dismiss() }
+
+        startCallButton.setOnClickListener {
+            val userId = userIdEditText.text.toString().trim()
+            if (userId.isNotEmpty()) {
+                dialog.dismiss()
+                startVoiceCall(userId, "Người dùng $userId")
+            } else {
+                SnackbarUtils.showErrorSnackbar(
+                    binding.root,
+                    "Vui lòng nhập ID người dùng",
+                    Snackbar.LENGTH_SHORT
+                )
+            }
+        }
+
+        dialog.show()
+    }
+
+    private fun startVoiceCall(userId: String, userName: String) {
+        try {
+            // Kiểm tra quyền trước khi gọi
+            if (!PermissionManager.hasPermissions(requireContext(), PermissionManager.VOICE_CALL_PERMISSIONS)) {
+                PermissionManager.requestPermissions(requireActivity(), PermissionManager.VOICE_CALL_PERMISSIONS)
+                return
+            }
+            
+            // Sử dụng ZegoUIKitPrebuiltCallService.inviteUser thay vì mở CallActivity trực tiếp
+            val doctorId = viewModel.getDoctorId()
+            val doctorName = viewModel.getDoctorName()
+            
+            // Tạo danh sách người dùng được mời
+            val invitees = listOf(
+                ZegoUIKitUser(userId, userName)
+            )
+            
+            // Gửi lời mời gọi âm thanh
+            ZegoUIKitPrebuiltCallService.sendInvitationWithUIChange(
+                requireActivity(),
+                invitees,
+                ZegoInvitationType.VOICE_CALL,
+                null,  // Config mặc định
+                null   // Callback không bắt buộc
+            )
+            
+            Timber.d("Voice call invitation sent to: $userName ($userId)")
+        } catch (e: Exception) {
+            SnackbarUtils.showErrorSnackbar(
+                binding.root,
+                "Không thể bắt đầu cuộc gọi: ${e.message}",
+                Snackbar.LENGTH_LONG
+            )
+            Timber.e(e, "Error starting voice call")
+        }
     }
 
     override fun cleanupViewReferences() {

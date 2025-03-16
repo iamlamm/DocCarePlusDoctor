@@ -1,7 +1,6 @@
 package com.healthtech.doccareplusdoctor.ui.main
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -30,16 +29,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupNavController()
+        
+        // Ẩn bottom navigation ban đầu
+        binding.bottomNavigation.visibility = View.GONE
 
-        lifecycleScope.launch(Dispatchers.Default) {
-            withContext(Dispatchers.Main) {
-                setupBottomNavigation()
-                setupNavigation()
-            }
-
-            withContext(Dispatchers.Main) {
-                checkAuthStatus()
-            }
+        lifecycleScope.launch {
+            setupBottomNavigation()
+            setupNavigation()
+            checkAuthStatus()
         }
     }
 
@@ -48,19 +45,18 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
 
-        // Thay thế navGraph với graph có AppointmentFragment là destination khởi đầu
-        val navInflater = navController.navInflater
-        val navGraph = navInflater.inflate(R.navigation.nav_graph)
-        navGraph.setStartDestination(R.id.appointmentFragment)
-        navController.graph = navGraph
+        // // Thay thế navGraph với graph có AppointmentFragment là destination khởi đầu
+        // val navInflater = navController.navInflater
+        // val navGraph = navInflater.inflate(R.navigation.nav_graph)
+        // navGraph.setStartDestination(R.id.appointmentFragment)
+        // navController.graph = navGraph
     }
 
     private fun setupBottomNavigation() {
         try {
             // Kết nối bottom navigation với navController
             binding.bottomNavigation.setupWithNavController(navController)
-            binding.bottomNavigation.visibility = View.VISIBLE
-
+            
             // Xử lý chọn item từ bottom navigation với animation
             binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
@@ -112,11 +108,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            // Thiết lập AppointmentFragment là tab mặc định
-            if (navController.currentDestination?.id == R.id.splashFragment) {
-                binding.bottomNavigation.selectedItemId = R.id.nav_appointments
-            }
-
             Timber.tag("MainActivity").d("Bottom Navigation đã được thiết lập")
         } catch (e: Exception) {
             Timber.tag("MainActivity").e(e, "Lỗi khi thiết lập Bottom Navigation: %s", e.message)
@@ -137,15 +128,15 @@ class MainActivity : AppCompatActivity() {
     private fun setupNavigation() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val hideBottomNav = when (destination.id) {
+                R.id.splashFragment,
+                R.id.loginFragment -> true
                 R.id.appointmentFragment,
                 R.id.telehealthFragment,
                 R.id.notificationFragment,
                 R.id.profileFragment -> false
-
                 else -> true
             }
 
-            // Cập nhật visibility của bottom navigation
             binding.bottomNavigation.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
 
             // Đồng bộ hóa selected item với current destination
@@ -189,5 +180,19 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp() || super.onSupportNavigateUp()
+    }
+
+    override fun onBackPressed() {
+        // Kiểm tra xem có fragment cuộc gọi đang hiện không
+        val callFragment = supportFragmentManager.findFragmentByTag("VOICE_CALL_FRAGMENT")
+        if (callFragment != null) {
+            // Nếu có, chỉ xóa nó
+            supportFragmentManager.beginTransaction()
+                .remove(callFragment)
+                .commitAllowingStateLoss()
+        } else {
+            // Xử lý back thông thường
+            super.onBackPressed()
+        }
     }
 }

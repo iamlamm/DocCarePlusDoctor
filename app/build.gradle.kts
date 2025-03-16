@@ -73,7 +73,11 @@ dependencies {
     // Cloudinary
     implementation(libs.cloudinary.android)
     // ZegoCloud
+//    implementation("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+")
+//    implementation("com.github.ZEGOCLOUD:zego-uikit-prebuilt-call-android:2.9.1")
+//    implementation("com.github.ZEGOCLOUD:zego-uikit-signaling-plugin-android:2.9.1")
     implementation("com.github.ZEGOCLOUD:zego_inapp_chat_uikit_android:+")
+    implementation("com.github.ZEGOCLOUD:zego_uikit_prebuilt_call_android:+")
     implementation(libs.dexter)
     // Hỗ trợ media
     implementation(libs.androidx.camera.core)

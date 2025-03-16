@@ -141,15 +141,6 @@ class LoginFragment : BaseFragment() {
         }
     }
 
-    private fun showLoadingState(isLoading: Boolean) {
-        binding.apply {
-            progressBarLogin.visibility = if (isLoading) View.VISIBLE else View.GONE
-            btnLoginSubmit.isEnabled = !isLoading
-            tilLoginEmail.isEnabled = !isLoading
-            tilLoginPassword.isEnabled = !isLoading
-            cbRememberMe.isEnabled = !isLoading
-        }
-    }
 
     private fun validateForm(): Boolean {
         val isEmailValid = validateEmail()

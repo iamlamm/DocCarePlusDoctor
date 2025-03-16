@@ -38,19 +38,24 @@ class AppointmentViewModel @Inject constructor(
 
     fun loadAppointments() {
         _appointmentsState.value = UiState.Loading
+        Timber.d("Loading appointments for doctor: $currentDoctorId")
 
         viewModelScope.launch {
             try {
                 firebaseApi.getDoctorAppointments(currentDoctorId).collect { appointments ->
+                    Timber.d("Received ${appointments.size} appointments from Firebase")
+                    
                     if (appointments.isEmpty()) {
+                        Timber.d("No appointments found")
                         _appointmentsState.value = UiState.Success(emptyList())
                     } else {
-                        // Cập nhật trạng thái cuộc hẹn dựa vào ngày hiện tại
                         val updatedAppointments = updateAppointmentStatusByDate(appointments)
+                        Timber.d("Updated ${updatedAppointments.size} appointments")
                         _appointmentsState.value = UiState.Success(updatedAppointments)
                     }
                 }
             } catch (e: Exception) {
+                Timber.e(e, "Error loading appointments")
                 _appointmentsState.value = UiState.Error("Lỗi khi tải lịch hẹn: ${e.message}")
             }
         }

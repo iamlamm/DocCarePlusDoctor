@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.healthtech.doccareplusdoctor.common.state.UiState
+import com.healthtech.doccareplusdoctor.data.local.preferences.DoctorPreferences
 import com.healthtech.doccareplusdoctor.data.remote.api.FirebaseApi
 import com.healthtech.doccareplusdoctor.domain.model.Appointment
 import com.zegocloud.zimkit.common.ZIMKitRouter
@@ -22,10 +23,9 @@ import kotlinx.coroutines.flow.asSharedFlow
 @HiltViewModel
 class TelehealthViewModel @Inject constructor(
     private val firebaseApi: FirebaseApi,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val doctorPreferences: DoctorPreferences
 ) : ViewModel() {
-
-    // Không cần loadUpcomingAppointments vì chúng ta chỉ hiển thị ZIMKit UI
 
     private val currentDoctorId: String
         get() = auth.currentUser?.uid ?: ""
@@ -35,6 +35,16 @@ class TelehealthViewModel @Inject constructor(
 
     init {
         Timber.tag("TelehealthViewModel").d("Current doctor ID: %s", currentDoctorId)
+    }
+
+    fun getDoctorId(): String {
+        // Sử dụng currentDoctorId từ auth hoặc từ preferences nếu cần
+        return doctorPreferences.getDoctor()?.id ?: currentDoctorId
+    }
+
+    fun getDoctorName(): String {
+        // Lấy tên bác sĩ từ doctorPreferences
+        return doctorPreferences.getDoctor()?.name ?: "Bác sĩ"
     }
 
     fun startVideoCall(appointmentId: String) {
