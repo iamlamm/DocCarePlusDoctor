@@ -12,9 +12,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 @AndroidEntryPoint
@@ -29,10 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupNavController()
-        
-        // Ẩn bottom navigation ban đầu
         binding.bottomNavigation.visibility = View.GONE
-
         lifecycleScope.launch {
             setupBottomNavigation()
             setupNavigation()
@@ -54,14 +49,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNavigation() {
         try {
-            // Kết nối bottom navigation với navController
             binding.bottomNavigation.setupWithNavController(navController)
-            
-            // Xử lý chọn item từ bottom navigation với animation
+
             binding.bottomNavigation.setOnItemSelectedListener { menuItem ->
                 when (menuItem.itemId) {
                     R.id.nav_appointments -> {
-                        Timber.tag("MainActivity").d("Navigating to appointmentFragment")
+                        Timber.d("Navigating to appointmentFragment")
                         if (navController.currentDestination?.id != R.id.appointmentFragment) {
                             navController.navigate(
                                 R.id.appointmentFragment, null,
@@ -72,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.nav_notifications -> {
-                        Timber.tag("MainActivity").d("Navigating to notificationFragment")
+                        Timber.d("Navigating to notificationFragment")
                         if (navController.currentDestination?.id != R.id.notificationFragment) {
                             navController.navigate(
                                 R.id.notificationFragment, null,
@@ -83,7 +76,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.nav_telehealth -> {
-                        Timber.tag("MainActivity").d("Navigating to telehealthFragment")
+                        Timber.d("Navigating to telehealthFragment")
                         if (navController.currentDestination?.id != R.id.telehealthFragment) {
                             navController.navigate(
                                 R.id.telehealthFragment, null,
@@ -94,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                     }
 
                     R.id.nav_profile -> {
-                        Timber.tag("MainActivity").d("Navigating to profileFragment")
+                        Timber.d("Navigating to profileFragment")
                         if (navController.currentDestination?.id != R.id.profileFragment) {
                             navController.navigate(
                                 R.id.profileFragment, null,
@@ -108,13 +101,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            Timber.tag("MainActivity").d("Bottom Navigation đã được thiết lập")
+            Timber.d("Bottom Navigation đã được thiết lập")
         } catch (e: Exception) {
-            Timber.tag("MainActivity").e(e, "Lỗi khi thiết lập Bottom Navigation: %s", e.message)
+            Timber.e(e, "Lỗi khi thiết lập Bottom Navigation: %s", e.message)
         }
     }
 
-    // Hàm tạo NavOptions để thêm animation khi chuyển đổi fragment
     private fun getNavOptions(enterAnim: Int, exitAnim: Int): NavOptions {
         return NavOptions.Builder()
             .setEnterAnim(enterAnim)
@@ -130,16 +122,17 @@ class MainActivity : AppCompatActivity() {
             val hideBottomNav = when (destination.id) {
                 R.id.splashFragment,
                 R.id.loginFragment -> true
+
                 R.id.appointmentFragment,
                 R.id.telehealthFragment,
                 R.id.notificationFragment,
                 R.id.profileFragment -> false
+
                 else -> true
             }
 
             binding.bottomNavigation.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
 
-            // Đồng bộ hóa selected item với current destination
             if (!hideBottomNav) {
                 val menuItemId = when (destination.id) {
                     R.id.appointmentFragment -> R.id.nav_appointments
@@ -154,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            Timber.tag("MainActivity").d("Destination đã thay đổi: %s", destination.label)
+            Timber.d("Destination đã thay đổi: %s", destination.label)
         }
     }
 
@@ -166,7 +159,6 @@ class MainActivity : AppCompatActivity() {
                     currentDestination != R.id.splashFragment &&
                     currentDestination != R.id.loginFragment
                 ) {
-                    // Sử dụng NavOptions để clear backstack khi chuyển về Login
                     val navOptions = NavOptions.Builder()
                         .setEnterAnim(R.anim.fade_in)
                         .setExitAnim(R.anim.fade_out)
@@ -182,6 +174,7 @@ class MainActivity : AppCompatActivity() {
         return navController.navigateUp() || super.onSupportNavigateUp()
     }
 
+    @Deprecated("This method has been deprecated in favor of using the\n      {@link OnBackPressedDispatcher} via {@link #getOnBackPressedDispatcher()}.\n      The OnBackPressedDispatcher controls how back button events are dispatched\n      to one or more {@link OnBackPressedCallback} objects.")
     override fun onBackPressed() {
         // Kiểm tra xem có fragment cuộc gọi đang hiện không
         val callFragment = supportFragmentManager.findFragmentByTag("VOICE_CALL_FRAGMENT")
@@ -192,7 +185,7 @@ class MainActivity : AppCompatActivity() {
                 .commitAllowingStateLoss()
         } else {
             // Xử lý back thông thường
-            super.onBackPressed()
+            super.onBackPressedDispatcher.onBackPressed()
         }
     }
 }

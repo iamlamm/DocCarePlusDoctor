@@ -27,20 +27,17 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _navigationState.value = UiState.Loading
-                
                 delay(500)
-                
                 val isLoggedIn = doctorPreferences.isDoctorLoggedIn()
                 val doctor = doctorPreferences.getDoctor()
-                
-                Timber.tag("SplashViewModel").d("isLoggedIn: $isLoggedIn, doctor: $doctor")
+
+                Timber.d("isLoggedIn: $isLoggedIn, doctor: $doctor")
 
                 val destination = if (isLoggedIn && doctor != null) {
                     try {
                         connectToZegoCloud(doctor.id, doctor.name, doctor.avatar)
                     } catch (e: Exception) {
-                        Timber.tag("SplashViewModel")
-                            .e("Error connecting to ZegoCloud: %s", e.message)
+                        Timber.e("Error connecting to ZegoCloud: %s", e.message)
                     }
                     R.id.appointmentFragment
                 } else {
@@ -49,7 +46,7 @@ class SplashViewModel @Inject constructor(
 
                 _navigationState.value = UiState.Success(destination)
             } catch (e: Exception) {
-                Timber.tag("SplashViewModel").e("Error checking login status: %s", e.message)
+                Timber.e("Error checking login status: %s", e.message)
                 _navigationState.value =
                     UiState.Error("Không thể kiểm tra trạng thái đăng nhập: ${e.message}")
             }
@@ -60,14 +57,14 @@ class SplashViewModel @Inject constructor(
         try {
             ZIMKit.connectUser(userId, userName, userAvatar) { error ->
                 if (error.code != ZIMErrorCode.SUCCESS) {
-                    Timber.tag("SplashViewModel").e("ZIMKit reconnect failed: %s", error.message)
+                    Timber.e("ZIMKit reconnect failed: %s", error.message)
                 } else {
                     Timber.tag("SplashViewModel")
                         .d("ZIMKit reconnect success with userId: %s", userId)
                 }
             }
         } catch (e: Exception) {
-            Timber.tag("SplashViewModel").e("Error in connectToZegoCloud: %s", e.message)
+            Timber.e("Error in connectToZegoCloud: %s", e.message)
         }
     }
 }

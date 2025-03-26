@@ -4,25 +4,18 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.healthtech.doccareplusdoctor.common.state.UiState
 import com.healthtech.doccareplusdoctor.data.local.preferences.DoctorPreferences
-import com.healthtech.doccareplusdoctor.data.remote.api.FirebaseApi
-import com.healthtech.doccareplusdoctor.domain.model.Appointment
 import com.zegocloud.zimkit.common.ZIMKitRouter
 import com.zegocloud.zimkit.common.enums.ZIMKitConversationType
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 
 @HiltViewModel
 class TelehealthViewModel @Inject constructor(
-    private val firebaseApi: FirebaseApi,
     private val auth: FirebaseAuth,
     private val doctorPreferences: DoctorPreferences
 ) : ViewModel() {
@@ -38,12 +31,10 @@ class TelehealthViewModel @Inject constructor(
     }
 
     fun getDoctorId(): String {
-        // Sử dụng currentDoctorId từ auth hoặc từ preferences nếu cần
         return doctorPreferences.getDoctor()?.id ?: currentDoctorId
     }
 
     fun getDoctorName(): String {
-        // Lấy tên bác sĩ từ doctorPreferences
         return doctorPreferences.getDoctor()?.name ?: "Bác sĩ"
     }
 
@@ -53,7 +44,6 @@ class TelehealthViewModel @Inject constructor(
 
     fun startNewChat(context: Context, userId: String) {
         try {
-            // Sử dụng ZIMKit API để kiểm tra user
             com.zegocloud.zimkit.services.ZIMKit.queryUserInfo(
                 userId
             ) { user, error ->

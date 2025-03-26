@@ -1,5 +1,6 @@
 package com.healthtech.doccareplusdoctor.ui.appointments
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
@@ -36,6 +37,7 @@ class AppointmentAdapter(
         private val binding: ItemAppointmentBinding
     ) : RecyclerView.ViewHolder(binding.root) {
 
+        @SuppressLint("SetTextI18n")
         fun bind(appointment: Appointment) {
             // Format ngày (chuyển từ "yyyy-MM-dd" sang "dd/MM/yyyy")
             val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -57,7 +59,6 @@ class AppointmentAdapter(
             binding.tvAppointmentId.text = "Mã cuộc hẹn: #${appointment.id}"
             binding.tvLocation.text = appointment.location
 
-            // Hiển thị trạng thái
             val context = binding.root.context
             when (appointment.status.lowercase()) {
                 "upcoming" -> {
@@ -85,24 +86,20 @@ class AppointmentAdapter(
                 }
             }
 
-            // Load ảnh bệnh nhân, dùng patientAvatar từ model nếu có
             Glide.with(binding.root)
                 .load(appointment.patientAvatar)
                 .placeholder(R.mipmap.avatar_male_default)
                 .error(R.mipmap.avatar_male_default)
                 .into(binding.ivUserAvatar)
 
-            // Thêm xử lý sự kiện click cho nút message
             binding.btnMessage.setOnClickListener {
                 onMessageClick(appointment)
             }
 
-            // Thêm xử lý sự kiện click cho nút voice call
             binding.btnVoiceCall.setOnClickListener {
                 onVoiceCallClick(appointment)
             }
 
-            // Xử lý sự kiện nút
             binding.btnReschedule.setOnClickListener {
                 onRescheduleClick(appointment)
             }

@@ -26,12 +26,4 @@ object ValidationUtils {
 
         return password.matches(passwordPattern.toRegex())
     }
-
-    fun isValidPhoneNumber(phoneNumber: String): Boolean {
-        return phoneNumber.length >= 10
-    }
-
-    fun isValidName(name: String): Boolean {
-        return name.length >= 2
-    }
 }

@@ -1,4 +1,4 @@
-package com.healthtech.doccareplusdoctor.ui.auth.login
+package com.healthtech.doccareplusdoctor.ui.auth
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
@@ -79,9 +79,11 @@ class LoginViewModel @Inject constructor(
     private fun connectToZegoCloud(doctorId: String, doctorName: String, doctorAvatar: String) {
         ZIMKit.connectUser(doctorId, doctorName, doctorAvatar) { error ->
             if (error.code != ZIMErrorCode.SUCCESS) {
-                Timber.tag("LoginViewModel").e("ZIMKit connect failed: %s", error.message)
+                Timber.tag("com.healthtech.doccareplusdoctor.ui.auth.LoginViewModel")
+                    .e("ZIMKit connect failed: %s", error.message)
             } else {
-                Timber.tag("LoginViewModel").d("ZIMKit connect success with doctorId: %s", doctorId)
+                Timber.tag("com.healthtech.doccareplusdoctor.ui.auth.LoginViewModel")
+                    .d("ZIMKit connect success with doctorId: %s", doctorId)
             }
         }
 

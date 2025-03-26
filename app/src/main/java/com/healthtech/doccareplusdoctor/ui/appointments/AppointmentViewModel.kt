@@ -1,6 +1,5 @@
 package com.healthtech.doccareplusdoctor.ui.appointments
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -10,12 +9,10 @@ import com.healthtech.doccareplusdoctor.domain.model.Appointment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 
@@ -32,7 +29,7 @@ class AppointmentViewModel @Inject constructor(
         get() = auth.currentUser?.uid ?: ""
 
     init {
-        Timber.tag("AppointmentViewModel").d("Current doctor ID: %s", currentDoctorId)
+        Timber.d("Current doctor ID: %s", currentDoctorId)
         loadAppointments()
     }
 
@@ -44,7 +41,7 @@ class AppointmentViewModel @Inject constructor(
             try {
                 firebaseApi.getDoctorAppointments(currentDoctorId).collect { appointments ->
                     Timber.d("Received ${appointments.size} appointments from Firebase")
-                    
+
                     if (appointments.isEmpty()) {
                         Timber.d("No appointments found")
                         _appointmentsState.value = UiState.Success(emptyList())

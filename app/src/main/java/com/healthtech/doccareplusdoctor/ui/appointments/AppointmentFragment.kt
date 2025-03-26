@@ -1,5 +1,6 @@
 package com.healthtech.doccareplusdoctor.ui.appointments
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -72,12 +73,13 @@ class AppointmentFragment : BaseFragment() {
         }
     }
 
+    @SuppressLint("SetTextI18n")
     private fun observeAppointments() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.appointmentsState.collect { state ->
                     Timber.d("Received appointment state: $state")
-                    
+
                     when (state) {
                         is UiState.Loading -> {
                             Timber.d("Loading appointments...")
@@ -85,11 +87,11 @@ class AppointmentFragment : BaseFragment() {
                             binding.rvAppointments.visibility = View.GONE
                             binding.tvEmptyState.visibility = View.GONE
                         }
-                        
+
                         is UiState.Success -> {
                             Timber.d("Appointments loaded: ${state.data.size} items")
                             binding.progressBarAppointment.setLoading(false)
-                            
+
                             if (state.data.isEmpty()) {
                                 binding.rvAppointments.visibility = View.GONE
                                 binding.tvEmptyState.visibility = View.VISIBLE
@@ -100,7 +102,7 @@ class AppointmentFragment : BaseFragment() {
                                 appointmentAdapter.submitList(state.data)
                             }
                         }
-                        
+
                         is UiState.Error -> {
                             Timber.e("Error loading appointments: ${state.message}")
                             binding.progressBarAppointment.setLoading(false)
@@ -108,7 +110,7 @@ class AppointmentFragment : BaseFragment() {
                             binding.tvEmptyState.visibility = View.VISIBLE
                             binding.tvEmptyState.text = state.message
                         }
-                        
+
                         else -> {
                             binding.progressBarAppointment.setLoading(false)
                         }
@@ -119,11 +121,6 @@ class AppointmentFragment : BaseFragment() {
     }
 
     private fun handleRescheduleClick(appointment: Appointment) {
-//        // Xử lý logic đổi lịch - có thể điều hướng đến màn hình RescheduleFragment
-//        Toast.makeText(requireContext(), "Đổi lịch cuộc hẹn: ${appointment.id}", Toast.LENGTH_SHORT)
-//            .show()
-//        SnackbarUtils.showSuccessSnackbar(binding.root, "Đổi lịch cuộc hẹn: ${appointment.id}")
-//        viewModel.rescheduleAppointment(appointment.id)
         SnackbarUtils.showInfoSnackbar(
             view = binding.root,
             message = "Tính năng đổi lịch đang được phát triển"
@@ -131,9 +128,10 @@ class AppointmentFragment : BaseFragment() {
     }
 
     private fun handleCancelClick(appointment: Appointment) {
-        // Hiển thị dialog xác nhận trước khi hủy
-        // Ở đây tôi chỉ gọi trực tiếp để đơn giản
-        Toast.makeText(requireContext(), "Đang hủy cuộc hẹn...", Toast.LENGTH_SHORT).show()
+        SnackbarUtils.showInfoSnackbar(
+            view = binding.root,
+            message = "Đang hủy cuộc hẹn..."
+        )
         viewModel.cancelAppointment(appointment.id)
     }
 
@@ -166,9 +164,7 @@ class AppointmentFragment : BaseFragment() {
 
     private fun navigateToVoiceCall(appointment: Appointment) {
         val userId = appointment.userId
-        val userName = if (appointment.patientName.isNotEmpty()) {
-            appointment.patientName
-        } else {
+        val userName = appointment.patientName.ifEmpty {
             "Bệnh nhân"
         }
 

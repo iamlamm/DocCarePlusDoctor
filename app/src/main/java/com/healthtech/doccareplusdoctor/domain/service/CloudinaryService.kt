@@ -1,7 +1,6 @@
 package  com.healthtech.doccareplusdoctor.domain.service
 
 import android.net.Uri
-import com.healthtech.doccareplusdoctor.utils.Constants
 import kotlinx.coroutines.flow.Flow
 
 interface CloudinaryService {

@@ -1,4 +1,4 @@
-package com.healthtech.doccareplusdoctor.ui.auth.login
+package com.healthtech.doccareplusdoctor.ui.auth
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -14,6 +14,7 @@ import androidx.fragment.app.viewModels
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
 import com.healthtech.doccareplusdoctor.databinding.FragmentLoginBinding
+import com.healthtech.doccareplusdoctor.ui.auth.login.LoginViewModel
 import com.healthtech.doccareplusdoctor.ui.main.MainActivity
 import com.healthtech.doccareplusdoctor.utils.ValidationUtils
 import com.healthtech.doccareplusdoctor.utils.showInfoDialog
@@ -22,8 +23,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class LoginFragment : BaseFragment() {
-
-
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
     private val viewModel: LoginViewModel by viewModels()

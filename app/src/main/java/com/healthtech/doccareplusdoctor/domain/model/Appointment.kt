@@ -10,7 +10,6 @@ data class Appointment(
     val createdAt: Long = 0,
     val notes: String? = null,
     val symptoms: String? = null,
-    // Các trường bổ sung từ quan hệ
     var doctorName: String = "",
     var doctorAvatar: String = "",
     var patientName: String = "",

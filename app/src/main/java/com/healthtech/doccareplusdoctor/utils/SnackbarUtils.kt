@@ -52,7 +52,6 @@ object SnackbarUtils {
         binding.tvMessage.text = message
         snackbarLayout.addView(binding.root)
         
-        // Thêm callback nếu có
         callback?.let { snackbar.addCallback(it) }
         
         snackbar.show()

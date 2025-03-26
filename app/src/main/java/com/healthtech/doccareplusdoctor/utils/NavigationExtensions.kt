@@ -1,8 +1,8 @@
 package com.healthtech.doccareplusdoctor.utils
 
-import android.util.Log
 import androidx.navigation.NavController
 import androidx.navigation.NavDirections
+import timber.log.Timber
 
 /**
  * Thực hiện navigation an toàn cho fragment-to-fragment navigation,
@@ -15,13 +15,10 @@ fun NavController.safeNavigate(actionId: Int) {
         if (action != null) {
             navigate(actionId)
         } else {
-            Log.w(
-                "Navigation",
-                "Action $actionId không tồn tại ở destination: ${currentDestination?.label}"
-            )
+            Timber.w("Action " + actionId + " không tồn tại ở destination: " + currentDestination?.label)
         }
     } catch (e: Exception) {
-        Log.e("Navigation", "Không thể navigate: ${e.message}")
+        Timber.e("Không thể navigate: " + e.message)
     }
 }
 
@@ -34,7 +31,7 @@ fun NavController.safeNavigateGlobal(destinationId: Int) {
     try {
         navigate(destinationId)
     } catch (e: Exception) {
-        Log.e("Navigation", "Không thể navigate đến destination: ${e.message}")
+        Timber.e("Không thể navigate đến destination: " + e.message)
     }
 }
 
@@ -48,13 +45,10 @@ fun NavController.safeNavigate(directions: NavDirections) {
         if (action != null) {
             navigate(directions)
         } else {
-            Log.w(
-                "Navigation",
-                "Action ${directions.actionId} không tồn tại ở destination: ${currentDestination?.label}"
-            )
+            Timber.w("Action " + directions.actionId + " không tồn tại ở destination: " + currentDestination?.label)
         }
     } catch (e: Exception) {
-        Log.e("Navigation", "Không thể navigate với directions: ${e.message}")
+        Timber.e("Không thể navigate với directions: " + e.message)
     }
 }
 

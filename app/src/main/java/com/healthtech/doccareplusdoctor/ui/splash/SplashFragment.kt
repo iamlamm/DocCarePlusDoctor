@@ -34,23 +34,18 @@ class SplashFragment : BaseFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
-        // Đảm bảo view được hiển thị
         binding.root.visibility = View.VISIBLE
-        
-        // Bắt đầu animation ngay lập tức
         startLogoAnimation()
         binding.progressBarSplash.setLoading(true)
-        
-        // Đợi animation hoàn thành rồi mới check login
+
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(1500) // Đợi animation fade in hoàn thành
+            delay(1500)
             viewModel.checkLoginStatus()
         }
-        
+
         observeNavigationState()
     }
-    
+
     private fun observeNavigationState() {
         viewModel.navigationState.collectLatestWithLifecycle { state ->
             handleUiState(
@@ -62,7 +57,7 @@ class SplashFragment : BaseFragment() {
                     }
                 },
                 onError = { message ->
-                    Timber.tag("SplashFragment").e("Navigation error: %s", message)
+                    Timber.e("Navigation error: %s", message)
                     if (!isNavigating) {
                         isNavigating = true
                         fadeOutAndNavigate(R.id.loginFragment)
@@ -71,15 +66,13 @@ class SplashFragment : BaseFragment() {
             )
         }
     }
-    
+
     private fun startLogoAnimation() {
         try {
-            // Set alpha về 0 để chuẩn bị fade in
             binding.imageView.alpha = 0f
             binding.imageView2.alpha = 0f
             binding.progressBarSplash.alpha = 0f
 
-            // Animation fade in
             fadeInSequentially(
                 binding.imageView,
                 binding.imageView2,
@@ -87,18 +80,18 @@ class SplashFragment : BaseFragment() {
                 delayBetween = 300
             )
         } catch (e: Exception) {
-            Timber.tag("SplashFragment").e("Error starting animation: %s", e.message)
+            Timber.e("Error starting animation: %s", e.message)
         }
     }
-    
+
     private fun fadeOutAndNavigate(destination: Int) {
         viewLifecycleOwner.lifecycleScope.launch {
-            delay(500) // Thêm delay nhỏ trước khi fade out
-            
+            delay(500)
+
             binding.imageView.fadeOut(duration = 500)
             binding.imageView2.fadeOut(duration = 500)
             binding.progressBarSplash.fadeOut(duration = 500)
-            
+
             binding.root.fadeOut(duration = 800) {
                 if (isAdded && !isDetached) {
                     navigateToDestination(destination)
@@ -106,25 +99,27 @@ class SplashFragment : BaseFragment() {
             }
         }
     }
-    
+
     private fun navigateToDestination(destination: Int) {
         try {
             when (destination) {
                 R.id.loginFragment -> {
-                    Timber.tag("SplashFragment").d("Navigating to login")
+                    Timber.d("Navigating to login")
                     findNavController().safeNavigate(R.id.action_splash_to_login)
                 }
+
                 R.id.appointmentFragment -> {
-                    Timber.tag("SplashFragment").d("Navigating to appointment")
+                    Timber.d("Navigating to appointment")
                     findNavController().safeNavigate(R.id.action_splash_to_appointment)
                 }
+
                 else -> {
-                    Timber.tag("SplashFragment").d("Navigating to login (default)")
+                    Timber.d("Navigating to login (default)")
                     findNavController().safeNavigate(R.id.action_splash_to_login)
                 }
             }
         } catch (e: Exception) {
-            Timber.tag("SplashFragment").e("Navigation error: %s", e.message)
+            Timber.e("Navigation error: %s", e.message)
         }
     }
 

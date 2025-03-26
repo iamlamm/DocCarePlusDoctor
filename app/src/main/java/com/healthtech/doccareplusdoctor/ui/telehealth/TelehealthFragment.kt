@@ -156,30 +156,36 @@ class TelehealthFragment : BaseFragment() {
 
     private fun startVoiceCall(userId: String, userName: String) {
         try {
-            // Kiểm tra quyền trước khi gọi
-            if (!PermissionManager.hasPermissions(requireContext(), PermissionManager.VOICE_CALL_PERMISSIONS)) {
-                PermissionManager.requestPermissions(requireActivity(), PermissionManager.VOICE_CALL_PERMISSIONS)
+            if (!PermissionManager.hasPermissions(
+                    requireContext(),
+                    PermissionManager.VOICE_CALL_PERMISSIONS
+                )
+            ) {
+                PermissionManager.requestPermissions(
+                    requireActivity(),
+                    PermissionManager.VOICE_CALL_PERMISSIONS
+                )
                 return
             }
-            
+
             // Sử dụng ZegoUIKitPrebuiltCallService.inviteUser thay vì mở CallActivity trực tiếp
             val doctorId = viewModel.getDoctorId()
             val doctorName = viewModel.getDoctorName()
-            
+
             // Tạo danh sách người dùng được mời
             val invitees = listOf(
                 ZegoUIKitUser(userId, userName)
             )
-            
+
             // Gửi lời mời gọi âm thanh
             ZegoUIKitPrebuiltCallService.sendInvitationWithUIChange(
                 requireActivity(),
                 invitees,
                 ZegoInvitationType.VOICE_CALL,
-                null,  // Config mặc định
-                null   // Callback không bắt buộc
+                null,
+                null
             )
-            
+
             Timber.d("Voice call invitation sent to: $userName ($userId)")
         } catch (e: Exception) {
             SnackbarUtils.showErrorSnackbar(

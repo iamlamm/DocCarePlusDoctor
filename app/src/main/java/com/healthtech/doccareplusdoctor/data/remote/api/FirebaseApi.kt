@@ -26,7 +26,7 @@ class FirebaseApi @Inject constructor(
 ) {
     @OptIn(DelicateCoroutinesApi::class)
     fun getDoctorAppointments(doctorId: String): Flow<List<Appointment>> = callbackFlow {
-        Timber.tag("FirebaseApi").d("Loading appointments for doctor: %s", doctorId)
+        Timber.d("Loading appointments for doctor: %s", doctorId)
         val appointmentsRef = database.getReference("appointments/byDoctor/$doctorId")
 
         val listener = object : ValueEventListener {
@@ -34,16 +34,15 @@ class FirebaseApi @Inject constructor(
                 Timber.d("Appointments snapshot received: " + snapshot.childrenCount + " items")
 
                 if (snapshot.childrenCount == 0L) {
-                    Timber.tag("FirebaseApi").d("No appointments found for doctor")
+                    Timber.d("No appointments found for doctor")
                     trySend(emptyList())
                     return
                 }
 
                 val appointmentsList = mutableListOf<Appointment>()
                 val pendingTasks = AtomicInteger(snapshot.childrenCount.toInt())
-                var dataSent = AtomicBoolean(false)
+                val dataSent = AtomicBoolean(false)
 
-                // Hàm để gửi dữ liệu khi tất cả đã hoàn thành hoặc timeout
                 fun sendDataIfComplete() {
                     if (pendingTasks.decrementAndGet() <= 0 && !dataSent.getAndSet(true)) {
                         val sortedList = appointmentsList.sortedWith(
@@ -54,12 +53,10 @@ class FirebaseApi @Inject constructor(
                     }
                 }
 
-                // Thêm timeout để đảm bảo luôn gửi dữ liệu sau một khoảng thời gian
-                val timeoutJob = GlobalScope.launch {
-                    delay(10000) // 10 giây timeout
+                GlobalScope.launch {
+                    delay(10000)
                     if (!dataSent.getAndSet(true)) {
-                        Timber.tag("FirebaseApi")
-                            .w("Timeout reached with ${pendingTasks.get()} pending tasks, sending available data")
+                        Timber.w("Timeout reached with ${pendingTasks.get()} pending tasks, sending available data")
                         val sortedList = appointmentsList.sortedWith(
                             compareBy({ it.date }, { it.startTime })
                         )
@@ -69,13 +66,12 @@ class FirebaseApi @Inject constructor(
 
                 for (childSnapshot in snapshot.children) {
                     val appointmentId = childSnapshot.key ?: continue
-                    Timber.tag("FirebaseApi").d("Processing appointment: $appointmentId")
+                    Timber.d("Processing appointment: $appointmentId")
 
                     database.getReference("appointments/details/$appointmentId").get()
                         .addOnSuccessListener { appointmentDetailSnapshot ->
                             if (appointmentDetailSnapshot.exists()) {
                                 try {
-                                    // Tạo đối tượng Appointment từ dữ liệu chi tiết
                                     val appointment = Appointment(
                                         id = appointmentId,
                                         date = appointmentDetailSnapshot.child("date")
@@ -98,7 +94,6 @@ class FirebaseApi @Inject constructor(
                                             .getValue(String::class.java) ?: ""
                                     )
 
-                                    // Thay đổi cách truy vấn thông tin thời gian
                                     database.getReference("timeSlots")
                                         .child(appointment.slotId.toString()).get()
                                         .addOnSuccessListener { timeSlotSnapshot ->
@@ -109,16 +104,12 @@ class FirebaseApi @Inject constructor(
                                                 appointment.endTime =
                                                     timeSlotSnapshot.child("endTime")
                                                         .getValue(String::class.java) ?: ""
-                                                Timber.tag("FirebaseApi")
-                                                    .d("TimeSlot found: ${appointment.slotId}, time: ${appointment.startTime}-${appointment.endTime}")
+                                                Timber.d("TimeSlot found: ${appointment.slotId}, time: ${appointment.startTime}-${appointment.endTime}")
                                             } else {
-                                                // Không tìm thấy trong timeSlots, sử dụng bảng tra cứu
                                                 useTimeSlotMapping(appointment)
-                                                Timber.tag("FirebaseApi")
-                                                    .d("Using mapped time for slot ${appointment.slotId}: ${appointment.startTime}-${appointment.endTime}")
+                                                Timber.d("Using mapped time for slot ${appointment.slotId}: ${appointment.startTime}-${appointment.endTime}")
                                             }
 
-                                            // Lấy thông tin người dùng
                                             database.getReference("users/${appointment.userId}")
                                                 .get()
                                                 .addOnSuccessListener { userSnapshot ->
@@ -129,68 +120,46 @@ class FirebaseApi @Inject constructor(
                                                         appointment.patientAvatar =
                                                             userSnapshot.child("avatar")
                                                                 .getValue(String::class.java)
-                                                        Timber.tag("FirebaseApi")
-                                                            .d("User info retrieved: ${appointment.patientName}, ${appointment.patientAvatar}")
+                                                        Timber.d("User info retrieved: ${appointment.patientName}, ${appointment.patientAvatar}")
                                                     }
-
-                                                    // Xác định vị trí
                                                     appointment.location = "Phòng khám DocCare+"
-
-                                                    // Thêm vào danh sách
                                                     appointmentsList.add(appointment)
-                                                    Timber.tag("FirebaseApi")
-                                                        .d("Appointment processed, remaining: ${pendingTasks.get()}")
-
-                                                    // Gửi dữ liệu nếu đã hoàn thành tất cả
+                                                    Timber.d("Appointment processed, remaining: ${pendingTasks.get()}")
                                                     sendDataIfComplete()
                                                 }
                                                 .addOnFailureListener { error ->
-                                                    Timber.tag("FirebaseApi")
-                                                        .e("Error getting user info: ${error.message}")
-
-                                                    // Thêm vào danh sách ngay cả khi không lấy được thông tin người dùng
+                                                    Timber.e("Error getting user info: ${error.message}")
                                                     appointment.location = "Phòng khám DocCare+"
                                                     appointmentsList.add(appointment)
-
-                                                    // Gửi dữ liệu nếu đã hoàn thành tất cả
                                                     sendDataIfComplete()
                                                 }
                                         }
                                         .addOnFailureListener { error ->
-                                            Timber.tag("FirebaseApi")
-                                                .e("Error getting timeSlot info: ${error.message}")
-
-                                            // Sử dụng bảng tra cứu khi có lỗi
+                                            Timber.e("Error getting timeSlot info: ${error.message}")
                                             useTimeSlotMapping(appointment)
-
-                                            // Tiếp tục xử lý cuộc hẹn...
                                             appointment.location = "Phòng khám DocCare+"
                                             appointmentsList.add(appointment)
 
-                                            // Gửi dữ liệu nếu đã hoàn thành tất cả
                                             sendDataIfComplete()
                                         }
                                 } catch (e: Exception) {
-                                    Timber.tag("FirebaseApi")
-                                        .e("Error processing appointment: ${e.message}")
+                                    Timber.e("Error processing appointment: ${e.message}")
                                     sendDataIfComplete()
                                 }
                             } else {
-                                Timber.tag("FirebaseApi")
-                                    .w("Appointment details not found for ID: $appointmentId")
+                                Timber.w("Appointment details not found for ID: $appointmentId")
                                 sendDataIfComplete()
                             }
                         }
                         .addOnFailureListener { error ->
-                            Timber.tag("FirebaseApi")
-                                .e("Error getting appointment details: ${error.message}")
+                            Timber.e("Error getting appointment details: ${error.message}")
                             sendDataIfComplete()
                         }
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                Timber.tag("FirebaseApi").e("Error loading appointments: %s", error.message)
+                Timber.e("Error loading appointments: %s", error.message)
                 close(error.toException())
             }
         }
