@@ -61,8 +61,8 @@ class CustomDialogFragment : DialogFragment() {
         _binding = DialogCustomBinding.inflate(LayoutInflater.from(context))
 
         val builder = MaterialAlertDialogBuilder(requireContext())
+            .setView(binding.root)
             .setCancelable(arguments?.getBoolean(ARG_CANCELABLE) ?: true)
-            .setTitle(arguments?.getString(ARG_TITLE))
 
         if (customView != null) {
             builder.setView(customView)
@@ -75,12 +75,16 @@ class CustomDialogFragment : DialogFragment() {
         return builder.create()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
         return null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // Không cần gọi super và setup vì đã được xử lý trong onCreateDialog
+
     }
 
     private fun setupDialogContent() {

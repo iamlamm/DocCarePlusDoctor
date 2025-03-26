@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
 import com.healthtech.doccareplusdoctor.databinding.FragmentLoginBinding
@@ -212,9 +213,10 @@ class LoginFragment : BaseFragment() {
     }
 
     private fun navigateToMainScreen() {
-        val intent = Intent(requireContext(), MainActivity::class.java)
-        startActivity(intent)
-        requireActivity().finish()
+//        val intent = Intent(requireContext(), MainActivity::class.java)
+//        startActivity(intent)
+//        requireActivity().finish()
+        findNavController().navigate(R.id.action_login_to_appointment)
     }
 
     private fun observeRememberMeState() {
