@@ -1,9 +1,8 @@
 package com.healthtech.doccareplusdoctor.data.local
 
+//import com.health tech.doccareplusdoctor.data.local.converter.TimePeriodConverter
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.TypeConverters
-//import com.healthtech.doccareplusdoctor.data.local.converter.TimePeriodConverter
 import com.healthtech.doccareplusdoctor.data.local.entity.UserEntity
 
 @Database(

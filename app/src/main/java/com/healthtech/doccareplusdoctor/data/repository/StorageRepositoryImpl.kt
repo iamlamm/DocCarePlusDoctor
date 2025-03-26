@@ -58,7 +58,6 @@ class StorageRepositoryImpl @Inject constructor(
         onProgress: ((Int) -> Unit)?
     ): Result<String> {
         return try {
-            // Tạo tên file nếu không được chỉ định
             val finalFileName = fileName ?: "${folder}_${System.currentTimeMillis()}"
             
             val result = cloudinaryService.uploadImage(

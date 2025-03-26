@@ -2,8 +2,6 @@ package com.healthtech.doccareplusdoctor.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.healthtech.doccareplusdoctor.domain.model.Gender
-import com.healthtech.doccareplusdoctor.domain.model.UserRole
 
 @Entity(tableName = "users")
 data class UserEntity(
