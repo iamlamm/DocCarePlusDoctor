@@ -184,7 +184,6 @@ class MainActivity : AppCompatActivity() {
                 .remove(callFragment)
                 .commitAllowingStateLoss()
         } else {
-            // Xử lý back thông thường
             super.onBackPressedDispatcher.onBackPressed()
         }
     }

@@ -14,7 +14,6 @@ import androidx.fragment.app.viewModels
 import com.healthtech.doccareplusdoctor.R
 import com.healthtech.doccareplusdoctor.common.base.BaseFragment
 import com.healthtech.doccareplusdoctor.databinding.FragmentLoginBinding
-import com.healthtech.doccareplusdoctor.ui.auth.login.LoginViewModel
 import com.healthtech.doccareplusdoctor.ui.main.MainActivity
 import com.healthtech.doccareplusdoctor.utils.ValidationUtils
 import com.healthtech.doccareplusdoctor.utils.showInfoDialog

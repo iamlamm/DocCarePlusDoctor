@@ -132,7 +132,7 @@ class AppointmentFragment : BaseFragment() {
             view = binding.root,
             message = "Đang hủy cuộc hẹn..."
         )
-        viewModel.cancelAppointment(appointment.id)
+        viewModel.cancelAppointment(appointment.id, binding.root)
     }
 
     private fun navigateToChat(appointment: Appointment) {

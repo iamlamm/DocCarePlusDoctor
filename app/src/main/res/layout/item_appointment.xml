@@ -32,13 +32,13 @@
             android:id="@+id/tv_appointment_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
             android:drawablePadding="4dp"
             android:textColor="@color/gray"
             android:textSize="14sp"
             app:drawableStartCompat="@drawable/ic_clock"
-            app:layout_constraintStart_toEndOf="@id/tv_appointment_date"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tv_appointment_date"
+            app:layout_constraintTop_toBottomOf="@+id/tv_appointment_date"
             tools:text="09:00 - 09:30" />
 
         <!-- Indicator trạng thái -->
@@ -65,7 +65,7 @@
             android:layout_height="1dp"
             android:layout_marginTop="12dp"
             android:background="@color/gray_200"
-            app:layout_constraintTop_toBottomOf="@id/tv_appointment_date" />
+            app:layout_constraintTop_toBottomOf="@id/tv_appointment_time" />
 
         <!-- Thông tin bác sĩ -->
         <de.hdodenhof.circleimageview.CircleImageView
